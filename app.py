@@ -10,7 +10,7 @@ def main():
     """
     Main func
     """
-
+    print('Starting checking you code...')
     bash_command = "git status"
     process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()

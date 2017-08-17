@@ -3,9 +3,7 @@ Helping functions and inner logic
 """
 
 
-from subprocess import PIPE
 import pycodestyle
-import inspect
 from pylint import epylint as lint
 from radon.complexity import cc_visit
 from radon.visitors import (Class as radon_class,
@@ -57,7 +55,7 @@ def check_complexity(filepath):
         results = cc_visit(_file.read())
         reports = []
         for result in results:
-            if result.complexity > 10: # 5 is temp value. 10 is correct
+            if result.complexity > 10:  # 5 is temp value. 10 is correct
                 file_report = dict(
                     file=filepath,
                     complexity=result.complexity,
@@ -85,9 +83,8 @@ def get_complexity_message(complexity):
         return "More than moderate risk - more complex block"
     elif complexity < 10:
         return "Low risk - well structured and stable block"
-    else:
-        return "Moderate risk - slightly complex block"
 
+    return "Moderate risk - slightly complex block"
 
 
 def lint_files(files):
@@ -95,7 +92,7 @@ def lint_files(files):
     Lint modified files and create report
     or commit changes with message.
     """
-    pep8 = 12 # for debugging
+    pep8 = 0  # for debugging
 
     filtered_files = filter_files(files)
     lint_results = []
@@ -104,13 +101,17 @@ def lint_files(files):
         if pep8 == 1:
             fchecker = pycodestyle.Checker(_file, show_source=True)
             file_errors = fchecker.check_all()
+            lint_results += file_errors
         elif pep8 == 0:
             stdout, stderr = lint.py_run(_file, return_std=True)
             # HINT! stdout.read() does not equal True
             # when is put within 'if' condition
+            if stderr:
+                print(stderr.read())
             message = stdout.read() + ''
-            if message:
-                print('Error:', message)
+            if has_error(message):
+                lint_results.append(message)
+                # print('Error:', message)
 
         complexity_results += check_complexity(_file)
 
@@ -121,9 +122,10 @@ def show_results(lint_results, complexity_results):
     """
     Show result of package working
     """
-    if not len(lint_results) and not len(complexity_results):
+    if not lint_results and not complexity_results:
         print("Mother of GOD... Your code is nice!")
         return make_commit()
+
     for l_result in lint_results:
         print('Lint:', l_result)
 
@@ -138,8 +140,10 @@ def show_results(lint_results, complexity_results):
 
 
 def has_error(message):
-    print('m[0]:', message[0])
-    return not message.startswith(' ----')
+    """
+    If message starts with '*' sybmol
+    """
+    return message.startswith('*')
 
 
 def filter_files(files):
