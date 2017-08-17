@@ -53,7 +53,6 @@ def check_flags(argv):
     try:
         opts, _ = getopt.getopt(argv, "l:c: h", [])
     except getopt.GetoptError as ex:
-        print(ex)
         print("See help by 'python app.py -h'")
         sys.exit(2)
 
@@ -215,7 +214,7 @@ def show_results(lint_results, complexity_results, output_file):
         return make_commit()
 
     for l_result in lint_results:
-        print('Lint:', l_result)
+        print('Lint errors:', l_result)
         text = ''
         if (output_file):
             write_result_to_file(output_file, text)
@@ -234,6 +233,7 @@ Comment: {}
         print(text)
         if (output_file):
             write_result_to_file(output_file, text)
+    sys.exit(1)
 
 
 def has_error(message):

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """
 Commit linter
 """
@@ -12,6 +14,7 @@ def main(argv):
     """
     print('Starting checking you code...')
     run(argv)
+    sys.exit(1)
 
 
 if __name__ == '__main__':
