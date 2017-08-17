@@ -3,7 +3,10 @@ Helping functions and inner logic
 """
 
 
+import sys
+import getopt
 import pycodestyle
+from subprocess import Popen, PIPE
 from pylint import epylint as lint
 from radon.complexity import cc_visit
 from radon.visitors import (Class as radon_class,
@@ -12,13 +15,83 @@ from radon.visitors import (Class as radon_class,
 
 MODIFIED_FILE_TEXT = 'modified:'
 NEW_FILE_TEXT = 'new file:'
+BASH_COMMAND = "git status"
+
+
+def run(argv):
+    """
+    Run all operations:
+    - check git updated files
+    - get script flags
+    - start linter and complexity analize
+    """
+    process = Popen(BASH_COMMAND.split(), stdout=PIPE)
+    output, error = process.communicate()
+    if error:
+        print('Bash command error: {}'.format(error))
+        sys.exit(2)
+
+    ustaged_files = collect_files_from_commit(str(output, 'utf-8'))
+    linter, complex_val, output_file = check_flags(argv)
+    lint_files(ustaged_files, linter, complex_val, output_file)
 
 
 def make_commit():
     """
     Create commit
     """
-    print('Make commit')
+    print('You may make commit')
+
+
+def check_flags(argv):
+    """
+    Handle scripts flags
+    """
+    linter = 'pep8'
+    complex_val = 10
+    output_file = None
+    try:
+        opts, _ = getopt.getopt(argv, "l:c: h", [])
+    except getopt.GetoptError as ex:
+        print(ex)
+        print("See help by 'python app.py -h'")
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == '-h':
+            message = '''You can use next optional flags:
+    -l  set linter. You can try 'pep8' or 'pylint'. Default is 'pep8'
+        Setting another linter will raise exeption
+    -c  Set lower complexity level. Default is 10
+        Other values:
+        1 - 5	A (low risk - simple block)
+        6 - 10	B (low risk - well structured and stable block)
+        11 - 20	C (moderate risk - slightly complex block)
+        21 - 30	D (more than moderate risk - more complex block)
+        31 - 40	E (high risk - complex block, alarming)
+        41+	    F (very high risk - error-prone, unstable block)
+    Example: "python app.py -l pylint'''
+    # -o  put statistics to output files
+            print(message)
+            sys.exit()
+
+        if opt == '-l':
+            linter = arg
+
+        elif opt == '-c':
+            try:
+                complex_val = int(arg)
+            except ValueError as ex:
+                print('Wrong complexity value! Will be used default')
+                complex_val = 10
+
+        elif opt == '-o':
+            output_file = arg
+
+        else:
+            sys.exit()
+
+    return linter, complex_val, output_file
 
 
 def collect_files_from_commit(text):
@@ -47,7 +120,7 @@ def collect_files_from_commit(text):
     return files
 
 
-def check_complexity(filepath):
+def check_complexity(filepath, complex_val=10):
     """
     Check file with radon lib and get complexity of his classes and functions
     """
@@ -55,7 +128,7 @@ def check_complexity(filepath):
         results = cc_visit(_file.read())
         reports = []
         for result in results:
-            if result.complexity > 10:  # 5 is temp value. 10 is correct
+            if result.complexity > complex_val:
                 file_report = dict(
                     file=filepath,
                     complexity=result.complexity,
@@ -87,23 +160,19 @@ def get_complexity_message(complexity):
     return "Moderate risk - slightly complex block"
 
 
-def lint_files(files):
+def lint_files(files, linter, complex_val, output_file=None):
     """
     Lint modified files and create report
     or commit changes with message.
     """
-    pep8 = 0  # for debugging
-
     filtered_files = filter_files(files)
     lint_results = []
     complexity_results = []
+
     for _file in filtered_files:
-        if pep8 == 1:
-            fchecker = pycodestyle.Checker(_file, show_source=True)
-            file_errors = fchecker.check_all()
-            lint_results += file_errors
-        elif pep8 == 0:
+        if linter == 'pylint':
             stdout, stderr = lint.py_run(_file, return_std=True)
+
             # HINT! stdout.read() does not equal True
             # when is put within 'if' condition
             if stderr:
@@ -113,12 +182,31 @@ def lint_files(files):
                 lint_results.append(message)
                 # print('Error:', message)
 
-        complexity_results += check_complexity(_file)
+        else:
+            if linter != 'pep8':
+                print('Unknown linter. Will be used default')
+                linter = 'pep8'
 
-    show_results(lint_results, complexity_results)
+            fchecker = pycodestyle.Checker(_file, show_source=True)
+            file_errors = fchecker.check_all()
+            # print('file err', file_errors)
+            if file_errors != 0:
+                lint_results.append(file_errors)
+
+        complexity_results += check_complexity(_file, complex_val)
+
+    show_results(lint_results, complexity_results, output_file)
 
 
-def show_results(lint_results, complexity_results):
+def write_result_to_file(output_file, text):
+    """
+    Write statistics to file
+    """
+    print('Write to {} text:\n{}'.format(output_file, text))
+    print('But not today... :)')
+
+
+def show_results(lint_results, complexity_results, output_file):
     """
     Show result of package working
     """
@@ -128,15 +216,24 @@ def show_results(lint_results, complexity_results):
 
     for l_result in lint_results:
         print('Lint:', l_result)
+        text = ''
+        if (output_file):
+            write_result_to_file(output_file, text)
 
     for c_result in complexity_results:
-        print('********************')
-        print('File: {}, line: {}, {} {}'.format(c_result['file'],
-                                                 c_result['line_number'],
-                                                 c_result['type'],
-                                                 c_result['object_name']))
-        print('Complexity: {}'.format(c_result['complexity']))
-        print('Comment: {}'.format(c_result['message']))
+        text = '''********************
+File: {}, line: {}, {}: {}
+Complexity: {}
+Comment: {}
+'''.format(c_result['file'],
+           c_result['line_number'],
+           c_result['type'],
+           c_result['object_name'],
+           c_result['complexity'],
+           c_result['message'])
+        print(text)
+        if (output_file):
+            write_result_to_file(output_file, text)
 
 
 def has_error(message):
