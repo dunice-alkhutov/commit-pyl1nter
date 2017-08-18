@@ -31,16 +31,12 @@ def run(argv):
         print('Bash command error: {}'.format(error))
         sys.exit(2)
 
-    ustaged_files = collect_files_from_commit(str(output, 'utf-8'))
+    try:
+        ustaged_files = collect_files_from_commit(str(output))
+    except TypeError:
+        ustaged_files = collect_files_from_commit(str(output, 'utf-8'))
     linter, complex_val, output_file = check_flags(argv)
     lint_files(ustaged_files, linter, complex_val, output_file)
-
-
-def make_commit():
-    """
-    Create commit
-    """
-    print('You may make commit')
 
 
 def check_flags(argv):
@@ -192,7 +188,7 @@ def lint_files(files, linter, complex_val, output_file=None):
             if file_errors != 0:
                 lint_results.append(file_errors)
 
-        complexity_results += check_complexity(_file, complex_val)
+    complexity_results += check_complexity(_file, complex_val)
 
     show_results(lint_results, complexity_results, output_file)
 
@@ -211,7 +207,7 @@ def show_results(lint_results, complexity_results, output_file):
     """
     if not lint_results and not complexity_results:
         print("Mother of GOD... Your code is nice!")
-        return make_commit()
+        sys.exit(0)
 
     for l_result in lint_results:
         print('Lint errors:', l_result)
