@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-Commit linter
+Pre-commit linter
 """
 
 import sys
