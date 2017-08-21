@@ -188,7 +188,7 @@ def lint_files(files, linter, complex_val, output_file=None):
             if file_errors != 0:
                 lint_results.append(file_errors)
 
-    complexity_results += check_complexity(_file, complex_val)
+        complexity_results += check_complexity(_file, complex_val)
 
     show_results(lint_results, complexity_results, output_file)
 
