@@ -31,9 +31,9 @@ def run(argv):
         print('Bash command error: {}'.format(error))
         sys.exit(2)
 
-    try:
+    if sys.version < '3':
         ustaged_files = collect_files_from_commit(str(output))
-    except TypeError:
+    else:
         ustaged_files = collect_files_from_commit(str(output, 'utf-8'))
     linter, complex_val, output_file = check_flags(argv)
     lint_files(ustaged_files, linter, complex_val, output_file)
