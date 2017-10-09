@@ -16,6 +16,7 @@ from radon.visitors import (Class as radon_class,
 MODIFIED_FILE_TEXT = 'modified:'
 NEW_FILE_TEXT = 'new file:'
 BASH_COMMAND = "git status"
+MAX_LINE_LENGTH = 79
 
 
 def run(argv):
@@ -47,7 +48,7 @@ def check_flags(argv):
     complex_val = 10
     output_file = None
     try:
-        opts, _ = getopt.getopt(argv, "l:c: h", [])
+        opts, _ = getopt.getopt(argv, "l:c:n: h", [])
     except getopt.GetoptError as ex:
         print("See help by 'python app.py -h'")
         sys.exit(2)
@@ -65,7 +66,8 @@ def check_flags(argv):
         21 - 30	D (more than moderate risk - more complex block)
         31 - 40	E (high risk - complex block, alarming)
         41+	    F (very high risk - error-prone, unstable block)
-    Example: "python app.py -l pylint'''
+    -n  Set maximum allowed line length. Default is 79
+    Example: "python app.py -n 100 -c 15'''
     # -o  put statistics to output files
             print(message)
             sys.exit()
@@ -82,6 +84,10 @@ def check_flags(argv):
 
         elif opt == '-o':
             output_file = arg
+
+        elif opt == '-n':
+            global MAX_LINE_LENGTH
+            MAX_LINE_LENGTH = int(arg)
 
         else:
             sys.exit()
@@ -182,7 +188,9 @@ def lint_files(files, linter, complex_val, output_file=None):
                 print('Unknown linter. Will be used default')
                 linter = 'pep8'
 
-            fchecker = pycodestyle.Checker(_file, show_source=True)
+            fchecker = pycodestyle.Checker(_file,
+                                           show_source=True,
+                                           max_line_length=MAX_LINE_LENGTH)
             file_errors = fchecker.check_all()
             # print('file err', file_errors)
             if file_errors != 0:
