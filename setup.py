@@ -15,7 +15,7 @@ setup(
     author_email='a.alkhutov@dunice.net',
     description='Pacakge Description',
     long_description=__doc__,
-    packages=['pyl1nter',],
+    packages=['pyl1nter'],
     scripts=['bin/pyl1nter'],
     zip_safe=False,
     include_package_data=True,
@@ -25,7 +25,7 @@ setup(
         'pylint',
         'radon',
     ],
-    download_url = 'https://github.com/dunice-alkhutov/commit-pyl1nter/tarball/1.0',
+    download_url='https://github.com/dunice-alkhutov/commit-pyl1nter/tarball/1.0',
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
