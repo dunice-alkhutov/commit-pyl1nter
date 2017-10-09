@@ -1,4 +1,4 @@
-Python pre-commit tool to check you code against some of the style conventions in PEP 8 and check complexity ofof your clasees and functions
+Python pre-commit tool to check you code against some of the style conventions in PEP 8 and check complexity of your clasees and functions
 ==========
 
 Instalation

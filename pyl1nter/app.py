@@ -5,7 +5,7 @@ Pre-commit linter
 """
 
 import sys
-from utils import run
+from pyl1nter.utils import run
 
 
 def main(argv):
@@ -15,7 +15,3 @@ def main(argv):
     print('Starting checking you code...')
     run(argv)
     sys.exit(1)
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

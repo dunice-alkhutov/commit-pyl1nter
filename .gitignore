@@ -1,3 +1,9 @@
 .vscode
 venv*
 *.pyc
+.DS_Store
+*.egg
+*.egg-info
+dist
+/.idea
+_build

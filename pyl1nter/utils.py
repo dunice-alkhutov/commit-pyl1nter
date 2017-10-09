@@ -99,8 +99,8 @@ def collect_files_from_commit(text):
     """
     Parse result of 'git status' command and collect unstaged files
     """
-    files = []
-    rows = text.split('\n')
+    files_to_handle = []
+    git_messages_rows = text.split('\n')
 
     def append_to_file(row, text):
         """
@@ -108,17 +108,17 @@ def collect_files_from_commit(text):
         """
         file_name_index = row.index(text)
         _file = row[file_name_index + len(text):].strip()
-        if _file not in files:
-            files.append(_file)
+        if _file not in files_to_handle:
+            files_to_handle.append(_file)
 
-    for row in rows:
+    for row in git_messages_rows:
         if MODIFIED_FILE_TEXT in row:
             append_to_file(row, MODIFIED_FILE_TEXT)
 
         if NEW_FILE_TEXT in row:
             append_to_file(row, NEW_FILE_TEXT)
 
-    return files
+    return files_to_handle
 
 
 def check_complexity(filepath, complex_val=10):
