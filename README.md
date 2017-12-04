@@ -1,22 +1,22 @@
 Python pre-commit tool to check you code against some of the style conventions in PEP 8 and check complexity of your clasees and functions
 ==========
 
-Instalation
+Installation
 -----------
 
-You need the following libs installed:
-1. pycodestyle
-2. pylint
-3. radon
+Install lib to your virtualenv
 
+```bash
+pip install commit-pyl1nt
+```
 
 Quick start
 -----------
-Copy `app.py` and `utils.py` to folder `/path_to_your_project/.git/hooks/`.
+Go to `/path_to_your_project/.git/hooks/`.
 Create file `pre-commit` and fill it like this:
 ```bash
 #!/bin/sh
-python .git/hooks/app.py
+pyl1nter -n 80
 ```
 
 Make sure that `pre-commit` has execution rights

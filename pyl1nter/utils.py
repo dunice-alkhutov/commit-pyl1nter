@@ -67,7 +67,7 @@ def check_flags(argv):
         31 - 40	E (high risk - complex block, alarming)
         41+	    F (very high risk - error-prone, unstable block)
     -n  Set maximum allowed line length. Default is 79
-    Example: "python app.py -n 100 -c 15'''
+    Example: "pyl1nter -n 100 -c 15'''
     # -o  put statistics to output files
             print(message)
             sys.exit()

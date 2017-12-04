@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='commit-pyl1nt',
-    version='1.0.4',
+    version='1.0.6',
     url='https://github.com/dunice-alkhutov/commit-pyl1nter',
     license='GNU',
     author='Alexey Alkhutov',
